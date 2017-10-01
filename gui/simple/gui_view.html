@@ -1,0 +1,18 @@
+<form method=post action="">
+    <table>
+          {% for field in form %}
+              <tr>
+                      <td>{{ field.name }}</td><td>{{ field }}</td>
+                          <td>{{ field.label }}</td>
+                              </tr>
+                                {% endfor %}
+                            </table>
+                            <p><input type=submit value=gui_compute></form></p>
+
+
+                        <p>
+                        {% if result != None %}
+                        <img src="{{ result }}" width="500">
+                        {% endif %}
+                        </p>
+

@@ -1,0 +1,18 @@
+import sys
+sys.dont_write_bytecode = True
+
+DELAYED_EXECUTION = False
+DELAY_CYCLES = 0
+PRINT_PNL = False
+PRINT_TRADES = True
+PLOT_PERFORMANCE = False
+STREAM_HISTORY_LEN = 500
+PRINT_OPTIMIZATION_RUN = True
+CALC_ROLLING_STATS = False
+INITIAL_CASH = 100000
+LOG_FREQUENCY = 5000
+LOG_TRADES = True
+TRADES_FILE = 'tmp/trades.dat'
+LOG_TRADES_TO_FILE = False
+RESULTS_FILE = '/tmp/slackline_results.dat'
+EXEC_MODE = 'mid'

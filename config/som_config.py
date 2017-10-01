@@ -1,0 +1,14 @@
+import sys
+sys.dont_write_bytecode = True
+
+DELAYED_EXECUTION = False
+PRINT_PNL = False
+PRINT_TRADES = False
+PLOT_PERFORMANCE = False
+STREAM_HISTORY_LEN = 50
+PRINT_OPTIMIZATION_RUN = True
+CALC_ROLLING_STATS = False
+INITIAL_CASH = 100000
+LOG_TRADES = True
+TRADES_FILE = 'results/trades.dat'
+LOG_TRADES_TO_FILE = False
