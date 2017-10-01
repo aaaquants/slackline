@@ -261,6 +261,18 @@ def walk_forward(instruments,start,finish,train_period,test_period,num_runs):
                     initialize=initialize,
                     init_optimization=init_optimization,
                     config=cfg)
+
+def run_bitstamp():
+    def handle_data_stream(context):
+        print 'current:',context.current['BTC'].one,context.current['BTC'].four
+        if random.randint(0,100) == 23:
+            order(context,'BTC',random.randint(-1,2))
+
+    data = BitstampFactory()
+    strategy = BitcoinStrategy(config=cfg,handle_data=handle_data_stream)
+    strategy.tick_stream(data)
+
+
 #*************************************************************************************
 
 if __name__=='__main__':
@@ -268,12 +280,12 @@ if __name__=='__main__':
     # run_web()
     # run_live()
     # run_random()
-    run_stream()
+    # run_stream()
     # run_stream_opt()
     # print run_optimize()
     # print run_train_test()
     # walk_forward(['data/MSFT.csv','data/AAPL.csv'],datetime(2012,1,1),datetime(2015,6,12),timedelta(days=100),timedelta(days=50),40)
     # run_grid_search()
     # run_switchover()
-
+    run_bitstamp()
 

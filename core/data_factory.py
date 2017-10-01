@@ -16,6 +16,7 @@ from core.logger import Logging
 from googlefinance import getQuotes
 from config import random_factory_config as rcfg
 import traceback
+from bitstampy import api
 logger = Logging(__name__,'/tmp/slackline.log').logger
 
 class RandomDataFactory():
@@ -121,6 +122,33 @@ class StreamDataFactory():
     def mydata(self):
         return self.fid.readline()
 
+class BitstampFactory():
+
+    def mydata(self):
+        tick = api.ticker()
+        last = float(tick['last'])
+        timestamp = tick['timestamp']
+        bid = float(tick['bid'])
+        ask = float(tick['ask'])
+        op = float(tick['open'])
+        high = float(tick['high'])
+        volume = float(tick['volume'])
+        vwap = float(tick['vwap'])
+        low = float(tick['low'])
+
+        return {'time':str(timestamp)+'.000000',
+                'open':op,
+                'high':high,
+                'low':low,
+                'close':last,
+                'vwap':vwap,
+                'bid':bid,
+                'ask':ask,
+                'volume':volume,
+                'ticker':'BTC',
+                }
+
+
 
 if __name__=="__main__":
     pass
@@ -145,3 +173,5 @@ if __name__=="__main__":
     # data = StreamDataFactory('data/test_stream.csv')
     # print data.mydata()
 
+    # data = BitstampFactory()
+    # print data

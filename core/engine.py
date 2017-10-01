@@ -190,7 +190,7 @@ class Strategy():
                     print traceback.format_exc()
                     self.error_count += 1
             except ValueError:
-                pass
+                print traceback.format_exc()
                 # print '--------------------------------'
                 logger.warning(traceback.format_exc())
                 # print '--------------------------------'
@@ -218,6 +218,97 @@ class Strategy():
         result = self.context.performance.get_results(self.context)
         result.to_csv(open(self.config.RESULTS_FILE,'w'))
         return result
+
+
+class BitcoinStrategy:
+    def __init__(self,config=config,handle_data=handle_data,initialize=initialize):
+        self.context = Context()
+        self.context.performance = Performance(config)
+        self.config = config
+        self.context.config = config
+        self.handle_data = handle_data
+        self.initialize = initialize
+        self.context.symbols = []
+        self.error_count = 0
+        self.context.portfolio.cash = config.INITIAL_CASH
+        self.count = 0
+        if self.config.LOG_TRADES_TO_FILE:
+            fid = open(self.config.TRADES_FILE,'w')
+
+
+    def tick_stream(self,data,start=datetime(1970,1,1),finish=datetime(2050,1,1)):
+        '''
+        Ticks need to be in the form:
+        {'ask': 22038, 'bid': 22036, 'ticker': 'A', 'time': '2016-12-16 12:34:23.28195'}
+        '''
+        self.context.mode = 'stream'
+        self.config.DELAYED_EXECUTION = True
+        finished = False
+        self.initialize(self.context)
+        self.context.data = data
+        while not finished:
+            self.count += 1
+            self.context.this_transactions = []
+            self.context.this_orders = []
+            try:
+                from_source = data.mydata()
+                if not from_source:
+                    self.error_count += 1
+                    if self.error_count > 100:
+                        finished = True
+                    else:
+                        continue
+                line = from_source
+                try:
+                    key = line['ticker']
+                    if not key in self.context.symbols:
+                        self.context.symbols.append(key)
+                    self.context.current[key] = Tick()
+                    self.context.current[key].one = line['bid']
+                    self.context.current[key].four = line['ask']
+                    self.context.current[key].date = line['time']
+                    self.context.performance.dates.append(line['time'])
+                    if key in  self.context.stream_history:
+                        self.context.stream_history[key].append({'bid':line['bid'],'ask':line['ask'],'time':line['time']})
+                    else:
+                        self.context.stream_history[key] = deque(maxlen=self.context.config.STREAM_HISTORY_LEN)
+                        self.context.stream_history[key].append({'bid':line['bid'],'ask':line['ask'],'time':line['time']})
+                    self.error_count = 0
+                except:
+                    logger.warning(traceback.format_exc())
+                    print traceback.format_exc()
+                    self.error_count += 1
+            except ValueError:
+                print traceback.format_exc()
+                # print '--------------------------------'
+                logger.warning(traceback.format_exc())
+                # print '--------------------------------'
+                # print '\n\n*****data finished*****\n\n'
+
+            if key in self.context.load:
+                if self.context.load[key] == 0:
+                    tick_execution(self.context,key)
+                    self.context.load.pop(key)
+                else:
+                    self.context.load[key]-=1
+
+            if not finished:
+                if not(start < parse_d(self.context.current[key].date) < finish):
+                    if parse_d(self.context.current[key].date) < finish:
+                        continue
+                    else:
+                        break
+                try: self.handle_data(self.context)
+                except:
+                    print traceback.format_exc()
+                    logger.warning(traceback.format_exc())
+                if not self.count%self.config.LOG_FREQUENCY:
+                    self.context.performance.log(self.context)
+
+        result = self.context.performance.get_results(self.context)
+        result.to_csv(open(self.config.RESULTS_FILE,'w'))
+
+
 
 if __name__=="__main__":
     source = DataSource()
